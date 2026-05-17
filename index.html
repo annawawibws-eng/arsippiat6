@@ -72,10 +72,13 @@
   </footer>
 
 <script>
-  const URL_WEB_APP = "https://script.google.com/macros/s/AKfycbxlLvCiy25gGFKBQaYDNFdGFItgFAMVeLJyIihst1EZjH1UKNzMVOH57Ci2zQSThNdqUg/exec"; // GANTI SAMA URL GAS KAMU
+  const URL_WEB_APP = https://script.google.com/macros/s/AKfycbxlLvCiy25gGFKBQaYDNFdGFItgFAMVeLJyIihst1EZjH1UKNzMVOH57Ci2zQSThNdqUg/exec; // GANTI SAMA URL GAS KAMU
   lucide.createIcons();
 
   document.getElementById('btn-cari').addEventListener('click', cariArsip);
+  document.getElementById('search-nama').addEventListener('keypress', function(e){
+    if(e.key === 'Enter') cariArsip();
+  });
 
   function cariArsip() {
     const nama = document.getElementById('search-nama').value;
@@ -83,10 +86,9 @@
     const tbody = document.getElementById('tabel-publik');
     tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">Mencari arsip...</td></tr>`;
 
-    // Panggil API GAS khusus publik
-    fetch(`${URL_WEB_APP}?action=getPublik&nama=${nama}&divisi=${divisi}`)
-      .then(res => res.json())
-      .then(data => {
+    fetch(`${URL_WEB_APP}?action=getPublik&nama=${encodeURIComponent(nama)}&divisi=${encodeURIComponent(divisi)}`)
+     .then(res => res.json())
+     .then(data => {
         if (data.length === 0) {
           tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">Arsip tidak ditemukan</td></tr>`;
           return;
@@ -99,18 +101,18 @@
             <td class="px-6 py-4">${d.kategori}</td>
             <td class="px-6 py-4">${new Date(d.tgl_arsip).toLocaleDateString('id-ID')}</td>
             <td class="px-6 py-4">
-  	      <a href="${d.file_url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview')}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-semibold flex items-center gap-1 w-fit">
-    	        <i data-lucide="eye" class="w-4 h-4"></i> Lihat
-  	      </a>
-	    </td>
+              <a href="${d.file_url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview')}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-semibold flex items-center gap-1 w-fit">
+                <i data-lucide="eye" class="w-4 h-4"></i> Lihat
+              </a>
+            </td>
           </tr>
         `).join('');
         lucide.createIcons();
       }).catch(err => {
-	tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-red-500">Gagal memuat data. Coba lagi.</td></tr>'; 
+        console.error(err);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-red-500">Gagal memuat data. Coba lagi.</td></tr>';
       });
-
-}
+  }
 </script>
 </body>
 </html>
