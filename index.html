@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Arsip Digital PIAT 6 Bondowoso</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <header class="bg-[#052E16] text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <img src="https://res.cloudinary.com/djbuaizlw/image/upload/q_auto/f_auto/v1776786556/LOGO_YAYASAN_1_ovwrtg.png" alt="Logo" class="w-12 h-12">
+          <div>
+            <h1 class="text-xl font-bold">E-Arsip Digital</h1>
+            <p class="text-sm text-green-200">Pesantren Islam Al Irsyad Tengaran 6 Bondowoso</p>
+          </div>
+        </div>
+        <a href="/admin" class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-semibold flex items-center gap-2">
+          <i data-lucide="log-in" class="w-4 h-4"></i> Login Petugas
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-8">
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">Pencarian Arsip Publik</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="text" id="search-nama" placeholder="Cari nama/kode arsip..." class="md:col-span-2 w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500">
+        <select id="search-divisi" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="">Semua Divisi</option>
+          <option>Yayasan</option><option>Mudir</option><option>MTw</option><option>IL/MA</option>
+          <option>Kepengasuhan</option><option>Keuangan/SDM</option><option>Rumah Tangga</option>
+        </select>
+        <button id="btn-cari" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold p-3 rounded-lg flex items-center justify-center gap-2">
+          <i data-lucide="search" class="w-5 h-5"></i> Cari Arsip
+        </button>
+      </div>
+      <p class="text-xs text-gray-500 mt-3">* Hanya arsip berstatus "Aktif" dan jenis "Biasa" yang ditampilkan untuk publik</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+            <tr>
+              <th class="px-6 py-4">Kode Arsip</th>
+              <th class="px-6 py-4">Nama Arsip</th>
+              <th class="px-6 py-4">Divisi</th>
+              <th class="px-6 py-4">Kategori</th>
+              <th class="px-6 py-4">Tanggal</th>
+              <th class="px-6 py-4">File</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-publik" class="divide-y divide-gray-200">
+            <tr><td colspan="6" class="text-center py-10 text-gray-500">Silakan lakukan pencarian untuk menampilkan arsip</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-6 text-sm text-gray-500">
+    © 2026 Yayasan An Nawawi - PIAT 6 Bondowoso. Sistem E-Arsip v1.0
+  </footer>
+
+<script>
+  const URL_WEB_APP = "https://script.google.com/macros/s/AKfycbxlLvCiy25gGFKBQaYDNFdGFItgFAMVeLJyIihst1EZjH1UKNzMVOH57Ci2zQSThNdqUg/exec"; // GANTI SAMA URL GAS KAMU
+  lucide.createIcons();
+
+  document.getElementById('btn-cari').addEventListener('click', cariArsip);
+
+  function cariArsip() {
+    const nama = document.getElementById('search-nama').value;
+    const divisi = document.getElementById('search-divisi').value;
+    const tbody = document.getElementById('tabel-publik');
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">Mencari arsip...</td></tr>`;
+
+    // Panggil API GAS khusus publik
+    fetch(`${URL_WEB_APP}?action=getPublik&nama=${nama}&divisi=${divisi}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">Arsip tidak ditemukan</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.map(d => `
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 font-medium text-gray-900">${d.kode_arsip}</td>
+            <td class="px-6 py-4">${d.nama_arsip}</td>
+            <td class="px-6 py-4">${d.divisi}</td>
+            <td class="px-6 py-4">${d.kategori}</td>
+            <td class="px-6 py-4">${new Date(d.tgl_arsip).toLocaleDateString('id-ID')}</td>
+            <td class="px-6 py-4">
+  	      <a href="${d.file_url.replace('/view?usp=sharing', '/preview').replace('/view', '/preview')}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-semibold flex items-center gap-1 w-fit">
+    	        <i data-lucide="eye" class="w-4 h-4"></i> Lihat
+  	      </a>
+	    </td>
+          </tr>
+        `).join('');
+        lucide.createIcons();
+      }).catch(err => {
+	tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-red-500">Gagal memuat data. Coba lagi.</td></tr>'; 
+      });
+
+}
+</script>
+</body>
+</html>
